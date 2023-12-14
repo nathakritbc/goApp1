@@ -22,11 +22,21 @@ func (a *App) CreateConnection() {
 func (a *App) Routes() {
 	r := gin.Default()
 	controller := controller.NewMangaController(a.DB)
+	controllerTodo := controller.NewTodoController(a.DB)
 	r.POST("/manga", controller.InsertManga)
 	r.GET("/manga", controller.GetAllManga)
 	r.GET("/manga/:id", controller.GetOneManga)
 	r.PUT("/manga/:id", controller.UpdateManga)
 	r.DELETE("/manga/:id", controller.DeleteManga)
+
+	// todos routes
+
+	r.POST("/todos", controller.controllerTodo)
+	// r.GET("/todos", controllerTodo.GetAllTodo)
+	// r.GET("/todos/:id", controllerTodo.GetOneTodo)
+	// r.PUT("/todos/:id", controllerTodo.UpdateTodo)
+	// r.DELETE("/todos/:id", controllerTodo.DeleteTodo)
+
 	a.Router = r
 }
 
