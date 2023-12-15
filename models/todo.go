@@ -4,12 +4,12 @@ type Todo struct {
 	Id        uint   `json:"id"`
 	Title     string `json:"title"`
 	Completed bool   `json:"completed"`
-	UserId    string `json:"userId"`
+	UserId    int    `json:"userId"`
 }
 
 type PostTodo struct {
 	Title     string `json:"title"`
-	UserId    string `json:"userId"`
+	UserId    int    `json:"userId"`
 	Completed bool   `json:"completed"`
 }
 

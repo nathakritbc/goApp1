@@ -16,9 +16,15 @@ func NewMangaRepository(db *sql.DB) MangaRepositoryInterface {
 
 // DeleteManga implements MangaRepositoryInterface
 func (m *MangaRepository) DeleteManga(id uint) bool {
-	_, err := m.Db.Query("SELECT * FROM manga WHERE id = $1", id)
-	if err == nil {
-		log.Println(err)
+
+	count := 0
+
+	err := m.Db.QueryRow("SELECT COUNT(*) FROM manga WHERE id = $1", id).Scan(&count)
+	if err != nil {
+		return false
+	}
+
+	if count == 0 {
 		return false
 	}
 

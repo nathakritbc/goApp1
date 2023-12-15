@@ -26,6 +26,8 @@ func (m *TodoController) DeleteTodo(c *gin.Context) {
 		return
 	}
 	repository := repository.NewTodoRepository(DB)
+	// fmt.Println(uri.ID)
+
 	delete := repository.DeleteTodo(uri.ID)
 	if delete {
 		c.JSON(200, gin.H{"status": "success", "msg": "delete todo successfully"})
@@ -41,6 +43,7 @@ func (m *TodoController) GetAllTodo(c *gin.Context) {
 	DB := m.Db
 	repository := repository.NewTodoRepository(DB)
 	get := repository.GetAllTodo()
+
 	if get != nil {
 		c.JSON(200, gin.H{"status": "success", "data": get, "msg": "get todo successfully"})
 		return

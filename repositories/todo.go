@@ -16,13 +16,19 @@ func NewTodoRepository(db *sql.DB) TodoRepositoryInterface {
 
 // DeleteTodo implements TodoRepositoryInterface
 func (m *TodoRepository) DeleteTodo(id uint) bool {
-	_, err := m.Db.Query("SELECT * FROM todo WHERE id = $1", id)
-	if err == nil {
-		log.Println(err)
+
+	count := 0
+
+	err := m.Db.QueryRow("SELECT COUNT(*) FROM todos WHERE id = $1", id).Scan(&count)
+	if err != nil {
 		return false
 	}
 
-	_, err = m.Db.Exec("DELETE FROM todo WHERE id = $1", id)
+	if count == 0 {
+		return false
+	}
+
+	_, err = m.Db.Exec("DELETE FROM todos WHERE id = $1", id)
 	// _, err := m.Db.Exec("DELETE FROM todo WHERE id = $1", id)
 
 	if err != nil {
@@ -34,11 +40,12 @@ func (m *TodoRepository) DeleteTodo(id uint) bool {
 
 // GetAllTodo implements TodoRepositoryInterface
 func (m *TodoRepository) GetAllTodo() []model.Todo {
-	query, err := m.Db.Query("SELECT * FROM todo")
+	query, err := m.Db.Query("SELECT * FROM todos")
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
+
 	var todos []model.Todo
 	if query != nil {
 		for query.Next() {
@@ -46,13 +53,13 @@ func (m *TodoRepository) GetAllTodo() []model.Todo {
 				id        uint
 				title     string
 				completed bool
-				userId    string
+				userId    int
 			)
 			err := query.Scan(&id, &title, &completed, &userId)
 			if err != nil {
 				log.Println(err)
 			}
-			todo := model.Todo{Id: id, Title: title}
+			todo := model.Todo{Id: id, Title: title, UserId: userId}
 			todos = append(todos, todo)
 		}
 	}
@@ -61,7 +68,7 @@ func (m *TodoRepository) GetAllTodo() []model.Todo {
 
 // GetOneTodo implements TodoRepositoryInterface
 func (m *TodoRepository) GetOneTodo(id uint) model.Todo {
-	query, err := m.Db.Query("SELECT * FROM todo WHERE id = $1", id)
+	query, err := m.Db.Query("SELECT * FROM todos WHERE id = $1", id)
 	if err != nil {
 		log.Println(err)
 		return model.Todo{}
@@ -73,7 +80,7 @@ func (m *TodoRepository) GetOneTodo(id uint) model.Todo {
 				id        uint
 				title     string
 				completed bool
-				userId    string
+				userId    int
 			)
 			err := query.Scan(&id, &title, &completed, &userId)
 			if err != nil {
@@ -87,7 +94,7 @@ func (m *TodoRepository) GetOneTodo(id uint) model.Todo {
 
 // InsertTodo implements TodoRepositoryInterface
 func (m *TodoRepository) InsertTodo(post model.PostTodo) bool {
-	stmt, err := m.Db.Prepare("INSERT INTO todo(title, completed, userId) VALUES ($1,$2,$3)")
+	stmt, err := m.Db.Prepare("INSERT INTO todos(title, completed, userId) VALUES ($1,$2,$3)")
 	if err != nil {
 		log.Println(err)
 		return false
@@ -104,7 +111,7 @@ func (m *TodoRepository) InsertTodo(post model.PostTodo) bool {
 
 // UpdateTodo implements TodoRepositoryInterface
 func (m *TodoRepository) UpdateTodo(id uint, post model.PostTodo) model.Todo {
-	_, err := m.Db.Exec("UPDATE todo SET title = $1, completed = $2, userId = $3 WHERE id = $4", post.Title, post.Completed, post.UserId, id)
+	_, err := m.Db.Exec("UPDATE todos SET title = $1, completed = $2, userId = $3 WHERE id = $4", post.Title, post.Completed, post.UserId, id)
 	if err != nil {
 		log.Println(err)
 		return model.Todo{}

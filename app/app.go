@@ -3,7 +3,8 @@ package app
 import (
 	"database/sql"
 
-	controller "go_app1/controllers"
+	"go_app1/controllers"
+
 	"go_app1/db"
 
 	"github.com/gin-gonic/gin"
@@ -21,21 +22,27 @@ func (a *App) CreateConnection() {
 
 func (a *App) Routes() {
 	r := gin.Default()
-	controller := controller.NewMangaController(a.DB)
-	controllerTodo := controller.NewTodoController(a.DB)
-	r.POST("/manga", controller.InsertManga)
-	r.GET("/manga", controller.GetAllManga)
-	r.GET("/manga/:id", controller.GetOneManga)
-	r.PUT("/manga/:id", controller.UpdateManga)
-	r.DELETE("/manga/:id", controller.DeleteManga)
+	v1 := r.Group("/api/v1")
+
+	// Simple group: v1
+	// v1 := r.Group("/api/v1")
+	controller := controllers.NewMangaController(a.DB)
+	controllerTodo := controllers.NewTodoController(a.DB)
+
+	mangaRoutes := v1.Group("/manga")
+	mangaRoutes.POST("/", controller.InsertManga)
+	mangaRoutes.GET("/", controller.GetAllManga)
+	mangaRoutes.GET("/:id", controller.GetOneManga)
+	mangaRoutes.PUT("/:id", controller.UpdateManga)
+	mangaRoutes.DELETE("/:id", controller.DeleteManga)
 
 	// todos routes
-
-	r.POST("/todos", controller.controllerTodo)
-	// r.GET("/todos", controllerTodo.GetAllTodo)
-	// r.GET("/todos/:id", controllerTodo.GetOneTodo)
-	// r.PUT("/todos/:id", controllerTodo.UpdateTodo)
-	// r.DELETE("/todos/:id", controllerTodo.DeleteTodo)
+	todoRoutes := v1.Group("/todos")
+	todoRoutes.POST("/", controllerTodo.InsertTodo)
+	todoRoutes.GET("/", controllerTodo.GetAllTodo)
+	todoRoutes.GET("/:id", controllerTodo.GetOneTodo)
+	todoRoutes.PUT("/:id", controllerTodo.UpdateTodo)
+	todoRoutes.DELETE("/:id", controllerTodo.DeleteTodo)
 
 	a.Router = r
 }
